@@ -5,12 +5,12 @@ import { Link } from 'react-router-dom'
 
 const SIDEBAR_ITEMS = [
     {name:"Overview", icon:BarChart2, color:"#6366f1", path:"/"},
-    {name:"Covid", icon:BarChart, color:"#8B5CF6", path:"/covid"}
+    {name:"Map", icon:BarChart, color:"#8B5CF6", path:"/map"}
 ]
 const Sidebar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   return (
-    <motion.div className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarOpen? 'w-64':'w-20'}`}
+    <motion.div className={`relative z-10 transition-all duration-100 ease-in-out flex-shrink-0 ${isSidebarOpen? 'w-64':'w-20'}`}
     animate={{width: isSidebarOpen?256:80}}>
     <div className='h-full bg-gray-800 bg-opacity-50 backdrop-blur-md p-4 flex flex-col border-r border-gray-700'>
         <motion.button
@@ -19,7 +19,7 @@ const Sidebar = () => {
         onClick={()=>setIsSidebarOpen(!isSidebarOpen)}
         className='p-2 rounded-full hover:bg-gray-700 transition-colors max-w-fit'
         >
-            <Menu size ={24}/>
+        <Menu size ={24}/>
         </motion.button>
         <nav className='mt-8 flex-grow'>
             {SIDEBAR_ITEMS.map((item)=>(

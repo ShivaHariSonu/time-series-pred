@@ -1,0 +1,50 @@
+appdirs==1.4.4
+cachetools==5.5.1
+certifi==2024.12.14
+darts==0.32.0
+dash==2.18.2
+dash-core-components==2.0.0
+dash-html-components==2.0.0
+dash-table==5.0.0
+fastjsonschema==2.21.1
+filelock==3.17.0
+Flask==3.0.3
+folium==0.19.4
+fonttools==4.55.8
+frozenlist==1.5.0
+fs==2.4.16
+fsspec==2024.12.0
+fugue==0.9.1
+gitdb==4.0.12
+GitPython==3.1.44
+holidays==0.65
+idna==3.10
+importlib_metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1737420181517/work
+ipykernel @ file:///Users/runner/miniforge3/conda-bld/ipykernel_1719845458456/work
+ipython @ file:///home/conda/feedstock_root/build_artifacts/ipython_1734788142186/work
+jsonschema==4.23.0
+jsonschema-specifications==2024.10.1
+jupyter_client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_client_1733440914442/work
+jupyter_core @ file:///home/conda/feedstock_root/build_artifacts/jupyter_core_1727163409502/work
+llvmlite==0.44.0
+markdown-it-py==3.0.0
+MarkupSafe==3.0.2
+matplotlib==3.10.0
+matplotlib-inline @ file:///home/conda/feedstock_root/build_artifacts/matplotlib-inline_1733416936468/work
+narwhals==1.24.0
+nbformat==5.10.4
+numpy==1.26.4
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1733203243479/work
+pandas==2.2.3
+pillow==11.1.0
+plotly==5.24.1
+pytorch-lightning==2.5.0.post0
+pytz==2024.2
+PyYAML==6.0.2
+scikit-learn==1.5.2
+scipy==1.15.1
+setuptools==75.8.0
+shap==0.46.0
+statsforecast==2.0.0
+statsmodels==0.14.4
+streamlit==1.41.1

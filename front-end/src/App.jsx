@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom"
 import OverviewPage from "./pages/OverviewPage"
-import CovidPage from "./pages/CovidPage"
+import MapPage from "./pages/MapPage"
 import Sidebar from "./components/Sidebar"
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
       <Sidebar/>
       <Routes>
         <Route path='/' element={<OverviewPage/>}></Route>
-        <Route path='/covid' element={<CovidPage/>}></Route>
+        <Route path='/map' element={<MapPage/>}></Route>
       </Routes>
     </div>
   )
