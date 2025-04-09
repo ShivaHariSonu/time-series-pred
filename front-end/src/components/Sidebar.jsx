@@ -1,11 +1,12 @@
-import { BarChart, BarChart2, Menu } from 'lucide-react'
+import { BarChart, BarChart2, ClipboardPlus, Menu } from 'lucide-react'
 import React, { useState } from 'react'
 import {AnimatePresence, motion} from 'framer-motion'
 import { Link } from 'react-router-dom'
 
 const SIDEBAR_ITEMS = [
     {name:"Overview", icon:BarChart2, color:"#6366f1", path:"/"},
-    {name:"Map", icon:BarChart, color:"#8B5CF6", path:"/map"}
+    {name:"Map", icon:BarChart, color:"#8B5CF6", path:"/map"},
+    {name:"Add data",icon:ClipboardPlus,color:"#EC4899", path:"/add-data"}
 ]
 const Sidebar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);

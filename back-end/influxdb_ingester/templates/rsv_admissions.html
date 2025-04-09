@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COVID Admissions Chart</title>
+    <!-- Plotly JS (if not already included elsewhere) -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>COVID Admissions Over Time</h1>
+    <!-- Render the Plotly chart -->
+    <div>
+        {{ chart_html_rsv|safe }}
+    </div>
+    
+    <!-- Optionally add forms or links to filter by ORGANIZATION_NM and CHILDRENS_HOSPITAL -->
+    <form method="get">
+        <label for="organization">Organization:</label>
+        <input type="text" id="organization" name="organization">
+        <label for="hospital">Children's Hospital:</label>
+        <input type="text" id="hospital" name="hospital">
+        <label for="timefreq">Time Frequency:</label>
+        <input type="text" id="timefreq" name="timefreq">
+        <button type="submit">Filter</button>
+    </form>
+</body>
+</html>
