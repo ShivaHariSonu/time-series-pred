@@ -13,9 +13,9 @@ const CovidOverviewChart = () => {
         COVID Admissions & Forecast
       </h2>
 
-      <div className="h-[600px] w-full">
+      <div className="h-[800px] w-full">
         <iframe
-          src="http://localhost:8050/covid"
+          src="http://localhost:8000/covid-admissions/"
           style={{
             width: '100%',
             height: '100%',

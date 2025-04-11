@@ -3,7 +3,6 @@ import Header from '../components/common/Header'
 import {motion} from "framer-motion"
 import StatCard from '../components/common/StatCard'
 import { Baby, BarChart, BarChart2, Hospital, MapPin, Users, Zap } from 'lucide-react'
-import SalesOverviewChart from '../components/overview/SalesOverviewChart'
 import CovidOverviewChart from '../components/overview/CovidOverviewChart'
 import InfluenzaOverviewChart from '../components/overview/InfluenzaOverviewChart'
 import RsvOverviewChart from '../components/overview/RsvOverviewChart'
@@ -23,11 +22,10 @@ const OverviewPage = () => {
             <StatCard name="No. of Diseases" icon={BarChart} value='3' color='#EC4899'/>
             <StatCard name="State" icon={MapPin} value='Utah' color='#10B981'/>
             </motion.div>
-            <div className='w-full'>
+            <div className='w-full flex flex-col gap-5'>
               <CovidOverviewChart/>
               <InfluenzaOverviewChart/>
               <RsvOverviewChart/>
-
             </div>
 
         </main>

@@ -15,7 +15,7 @@ const RsvOverviewChart = () => {
 
       <div className="h-[800px] w-full">
         <iframe
-          src="http://localhost:8050/rsv"
+          src="http://localhost:8000/rsv-admissions/"
           style={{
             width: '100%',
             height: '100%',

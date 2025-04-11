@@ -10,7 +10,7 @@ const TextField = ({ label, value, onChange, placeholder = "", type = "text" }) 
         onChange={onChange}
         placeholder={placeholder}
         step="1"
-        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-200 w-72 flex-shrink-0"
+        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-200 w-72 flex-shrink-0"
       />
     </div>
   )

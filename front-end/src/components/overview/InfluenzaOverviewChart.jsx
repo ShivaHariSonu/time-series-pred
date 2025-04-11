@@ -15,7 +15,7 @@ const InfluenzaOverviewChart = () => {
 
       <div className="h-[800px] w-full">
         <iframe
-          src="http://localhost:8050/influenza"
+          src="http://localhost:8000/influenza-admissions/"
           style={{
             width: '100%',
             height: '100%',

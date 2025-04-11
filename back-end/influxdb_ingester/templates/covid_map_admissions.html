@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RSV Admissions Chart</title>
+    <title>COVID Map Chart</title>
     <!-- Plotly JS (if not already included elsewhere) -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6">
     <div class="max-w-7xl mx-auto mb-8">
-        {{ chart_html_rsv|safe }}
+        {{ chart_html_covid_map|safe }}
     </div>
     
     <!-- Optionally add forms or links to filter by ORGANIZATION_NM and CHILDRENS_HOSPITAL -->

@@ -13,9 +13,9 @@ const CovidMapChart = () => {
         COVID Map
       </h2>
 
-      <div className="h-[800px] w-full">
+      <div className="h-[850px] w-full">
         <iframe
-          src="http://localhost:8050/covidmap"
+          src="http://localhost:8000/covid-map-view/"
           style={{
             width: '100%',
             height: '100%',

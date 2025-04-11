@@ -7,7 +7,7 @@ const SelectSwitch = ({label,options, value, onChange}) => {
       <select
         value={value}
         onChange={onChange}
-        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-200 w-72 flex-shrink-0"
+        className="bg-gray-600 hover:bg-gray-700 text-white border border-gray-600 py-2 px-4 rounded transition duration-200 w-72 flex-shrink-0"
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>
