@@ -241,6 +241,7 @@ def rsv_admissions_view(request):
 @api_view(['POST'])
 def ingest_one_record(request):
     data = request.data
+    
     try:
         send_to_kafka('test', data)
         return Response({'message': 'Data sent to Kafka'}, status=status.HTTP_200_OK)

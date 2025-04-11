@@ -33,7 +33,7 @@ const Data = () => {
     const [region,setRegion] = useState(regions[0]);
 
     const measurements = ['covid','influenza','rsv']
-    const [measurement,setMeasurement] = useState(regions[0]);
+    const [measurement,setMeasurement] = useState(measurements[0]);
 
     const [reasonforvisit, setReasonForVisit] = useState("");
     const [nurseunitdsp, setNurseUnitDSP] = useState("");

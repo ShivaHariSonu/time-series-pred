@@ -19,11 +19,13 @@ consumer = KafkaConsumer(
     value_deserializer=lambda m: json.loads(m.decode('utf-8'))
 )
 
-conf = settings.INFLUXDB_SETTINGS
-INFLUXDB_TOKEN = conf['token']
-INFLUXDB_URL = conf['url']
-INFLUXDB_ORG = conf['org']
-INFLUXDB_BUCKET = conf['bucket']
+
+
+INFLUXDB_TOKEN="u9-rX6MNrziGfs2Fq6d4f9JNl_XWN6_DmxmciDtDUY9w8ehkgZxm9Axp4iuqUIhygsiEGC1tkPFtxt9h6G8hHg=="
+INFLUXDB_ORG="Shiva"
+INFLUXDB_URL="http://localhost:8086"
+INFLUXDB_BUCKET="timeseriesprediction"
+
 
 def send_to_kafka(topic, data):
     producer.send(topic, data)
@@ -31,7 +33,7 @@ def send_to_kafka(topic, data):
     
 
     
-def create_point(raw_data:str) -> Point:
+def create_point(data) -> Point:
     """
     Create an InfluxDB point from a CSV row.
     
@@ -40,7 +42,6 @@ def create_point(raw_data:str) -> Point:
       - ORGANIZATION_NM, CHILDRENS_HOSPITAL: tags
       - EMPI, AGE_YEARS_NO, AGE_DAYS, REGION, REASON_FOR_VISIT, NURSE_UNIT_DSP, ICU_FLG: fields
     """
-    data = json.loads(raw_data)
     point = Point(data["measurement"])
     
     try:
@@ -50,15 +51,11 @@ def create_point(raw_data:str) -> Point:
         return None
     point.time(timestamp, WritePrecision.S)
     
-    toggleDataString = data["toggleData"]
+    toggleData = data["toggleData"]
     
-    toggleData = json.loads(toggleDataString)
-    
-    # Add tags (ensure they are strings)
     point.tag("ORGANIZATION_NM", str(data["hospital"]))
     point.tag("CHILDRENS_HOSPITAL", str(1 if toggleData["children"] else 0))
-    
-    # Add fields
+
     try:
         point.field("EMPI", int(data["empi"]))
         point.field("AGE_YEARS_NO", int(data["ageyearsno"]))
@@ -74,7 +71,16 @@ def create_point(raw_data:str) -> Point:
     return point
 
 
+def safe_json_deserializer(message):
+    try:
+        decoded = message.decode('utf-8')
+        return json.loads(decoded)
+    except Exception as e:
+        print(f"[Deserializer Error] Raw message: {message}")
+        print(f"[Deserializer Error] Exception: {e}")
+        return None
     
+
 def run_consumer():
     print("Starting Kafka Consumer Thread...")
     influx_client = InfluxDBClient(
@@ -88,13 +94,13 @@ def run_consumer():
         bootstrap_servers='localhost:9092',
         auto_offset_reset='earliest',
         group_id='influx-consumer-group',
-        value_deserializer=lambda m: json.loads(m.decode('utf-8'))
-    )
-    #TBD :- Based on Input from the kafka need to update the point
+        value_deserializer=safe_json_deserializer)
     for msg in consumer:
+        if msg is None:
+            print("[Warning] Skipped empty or malformed message")
+            continue
         data = msg.value
         print(f"[Consumer] Consumed: {data}")
-        
         point = create_point(data)
         if point:
             write_api.write(INFLUXDB_BUCKET, INFLUXDB_ORG, point)
