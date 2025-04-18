@@ -329,7 +329,7 @@ def covid_admissions_view(request):
     hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
     
-    if timefreq is None:
+    if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
     df = get_data("covid")
     chart_html_covid = plot_covid_admissions_chart(df, organization, hospital,timefreq)
@@ -343,7 +343,7 @@ def covid_map_view(request):
     hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
     
-    if timefreq is None:
+    if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
     # Load and process data
     df = get_data("covid")
@@ -361,7 +361,7 @@ def influenza_admissions_view(request):
     hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
     
-    if timefreq is None:
+    if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
     # Load and process data
     df = get_data("influenza")
@@ -378,7 +378,7 @@ def rsv_admissions_view(request):
     hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
     
-    if timefreq is None:
+    if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
     # Load and process data
     df = get_data("rsv")
