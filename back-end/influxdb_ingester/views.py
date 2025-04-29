@@ -52,7 +52,7 @@ hospital_locations = {
     "Primary Childrens Lehi Behavioral Health - Miller Campus":(40.5148764717385, -111.9992368087777)
 }
 
-hospital_options = [{'label': "Childrens hospital", 'value': 1},{'label': "Not childrens hospital", 'value': 0}]
+hospital_options = [{'label': "All Hospitals", 'value': 'All'},{'label': "Childrens hospital", 'value': '1'},{'label': "Not childrens hospital", 'value': '0'}]
 
 time_options = []
 for time_format in ['WEEKLY','YEARLY','DAILY']:
@@ -91,11 +91,11 @@ def get_data(measurement:str):
     return df_filtered
 
 
-def plot_covid_admissions_chart(covid_df,organization=None, hospital=None, time_freq=None):
+def plot_covid_admissions_chart(covid_df,organization=None, child_hospital=None, time_freq=None):
     if organization:
         covid_df = covid_df[covid_df['ORGANIZATION_NM'] == organization]
-    if hospital:
-        covid_df = covid_df[covid_df['CHILDRENS_HOSPITAL'] == hospital]
+    if child_hospital and child_hospital!='All':
+        covid_df = covid_df[covid_df['CHILDRENS_HOSPITAL'] == child_hospital]
     forecast_dfs = []
     for hospital in covid_df['ORGANIZATION_NM'].unique():
         df_hosp = covid_df[covid_df['ORGANIZATION_NM'] == hospital]
@@ -214,6 +214,8 @@ def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, t
             scope="usa",
             showland=True,
             landcolor="rgb(117, 117, 117)",
+            showlakes=True,
+            lakecolor="rgb(117,117,117)",
             center=dict(lat=39.321, lon=-111.093),  # Center the map on Utah
             projection_scale=4
         )
@@ -221,11 +223,22 @@ def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, t
     return fig.to_html(full_html=False)
 
 
-def plot_influenza_admissions_chart(influenza_df,organization=None, hospital=None, time_freq=None):
+def plot_influenza_admissions_chart(influenza_df,organization=None, time_freq=None):
     if organization:
         influenza_df = influenza_df[influenza_df['ORGANIZATION_NM'] == organization]
-    if hospital:
-        influenza_df = influenza_df[influenza_df['CHILDRENS_HOSPITAL'] == hospital]
+        
+    if len(influenza_df)==0:
+        fig = px.line(title="Influenza Time Series prediction")
+        fig.update_xaxes(
+        dtick="M1",  # Show each month
+        tickformat="%b",  # Display month names (Jan, Feb, etc.)
+        title="Month"
+        )
+        fig.update_yaxes(
+        title="No. of Admissions"
+        )
+        return fig.to_html(full_html=False)
+        
     forecast_dfs = []
     for hospital in influenza_df['ORGANIZATION_NM'].unique():
         df_hosp = influenza_df[influenza_df['ORGANIZATION_NM'] == hospital]
@@ -271,11 +284,21 @@ def plot_influenza_admissions_chart(influenza_df,organization=None, hospital=Non
 
 
 
-def plot_rsv_admissions_chart(rsv_df,organization=None, hospital=None, time_freq=None):
+def plot_rsv_admissions_chart(rsv_df,organization=None, time_freq=None):
     if organization:
         rsv_df = rsv_df[rsv_df['ORGANIZATION_NM'] == organization]
-    if hospital:
-        rsv_df = rsv_df[rsv_df['CHILDRENS_HOSPITAL'] == hospital]
+        
+    if len(rsv_df)==0:
+        fig = px.line(title="RSV Time Series prediction")
+        fig.update_xaxes(
+        dtick="M1",  # Show each month
+        tickformat="%b",  # Display month names (Jan, Feb, etc.)
+        title="Month"
+        )
+        fig.update_yaxes(
+        title="No. of Admissions"
+        )
+        return fig.to_html(full_html=False)
     forecast_dfs = []
     for hospital in rsv_df['ORGANIZATION_NM'].unique():
         df_hosp = rsv_df[rsv_df['ORGANIZATION_NM'] == hospital]
@@ -324,7 +347,6 @@ def plot_rsv_admissions_chart(rsv_df,organization=None, hospital=None, time_freq
 ##Functions for all the views
 
 def covid_admissions_view(request):
-    # Retrieve filter parameters from the GET request (if any)
     organization = request.GET.get("organization")
     hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
@@ -334,60 +356,61 @@ def covid_admissions_view(request):
     df = get_data("covid")
     chart_html_covid = plot_covid_admissions_chart(df, organization, hospital,timefreq)
     
-    return render(request, 'covid_admissions.html', {'chart_html_covid': chart_html_covid,'organisations': hospital_locations.keys(), 
-                                                     'hospital_options':hospital_options,'time_options':time_options})
+    return render(request, 'covid_admissions.html', {'chart_html_covid': chart_html_covid,
+                                                     'organisations': hospital_locations.keys(), 
+                                                     'hospital_options':hospital_options,
+                                                     'time_options':time_options,
+                                                     'hospital': hospital,
+                                                     'timefreq': timefreq})
 
 def covid_map_view(request):
-    # Retrieve filter parameters from the GET request (if any)
     organization = request.GET.get("organization")
     hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
     
     if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
-    # Load and process data
     df = get_data("covid")
-    # Generate Plotly chart HTML after applying filters
     chart_html_covid_map = plot_covid_admissions_map_chart(df, organization, hospital,timefreq)
-    
-    # Render the chart in the Django template
-    return render(request, 'covid_map_admissions.html', {'chart_html_covid_map': chart_html_covid_map,'organisations': hospital_locations.keys(), 
-                                                     'hospital_options':hospital_options,'time_options':time_options})
+    return render(request, 'covid_map_admissions.html', {'chart_html_covid_map': chart_html_covid_map,
+                                                         'organisations': hospital_locations.keys(), 
+                                                     'hospital_options':hospital_options,
+                                                     'time_options':time_options})
     
     
 def influenza_admissions_view(request):
-    # Retrieve filter parameters from the GET request (if any)
     organization = request.GET.get("organization")
-    hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
+    if organization is None or len(organization)==0:
+        organization = "Primary Childrens Hospital"
     
     if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
-    # Load and process data
     df = get_data("influenza")
-    # Generate Plotly chart HTML after applying filters
-    chart_html_influenza = plot_influenza_admissions_chart(df, organization, hospital,timefreq)
+    chart_html_influenza = plot_influenza_admissions_chart(df, organization,timefreq)
     
-    # Render the chart in the Django template
-    return render(request, 'influenza_admissions.html', {'chart_html_influenza': chart_html_influenza, 'organisations': hospital_locations.keys(), 
-                                                     'hospital_options':hospital_options,'time_options':time_options})
+    return render(request, 'influenza_admissions.html', {'chart_html_influenza': chart_html_influenza,
+                                                         'organisations': hospital_locations.keys(),
+                                                     'time_options':time_options,
+                                                     'organization': organization,
+                                                    'timefreq': timefreq})
 
 def rsv_admissions_view(request):
-    # Retrieve filter parameters from the GET request (if any)
     organization = request.GET.get("organization")
-    hospital = request.GET.get("hospital")
     timefreq = request.GET.get("timefreq")
+    
+    if organization is None or len(organization)==0:
+        organization = "Primary Childrens Hospital"
     
     if timefreq is None or len(timefreq)==0:
         timefreq = "ME"
-    # Load and process data
     df = get_data("rsv")
-    # Generate Plotly chart HTML after applying filters
-    chart_html_rsv = plot_rsv_admissions_chart(df, organization, hospital,timefreq)
-    
-    # Render the chart in the Django template
-    return render(request, 'rsv_admissions.html', {'chart_html_rsv': chart_html_rsv, 'organisations': hospital_locations.keys(), 
-                                                     'hospital_options':hospital_options,'time_options':time_options})
+    chart_html_rsv = plot_rsv_admissions_chart(df, organization,timefreq)
+    return render(request, 'rsv_admissions.html', {'chart_html_rsv': chart_html_rsv,
+                                                   'organisations': hospital_locations.keys(),
+                                                     'time_options':time_options,
+                                                     'organization': organization,
+                                                    'timefreq': timefreq})
     
     
 @api_view(['POST'])

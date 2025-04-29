@@ -184,6 +184,8 @@ def register_covid_map_callbacks(app):
                 scope="usa",
                 showland=True,
                 landcolor="rgb(117, 117, 117)",
+                showlakes=True,
+                lakecolor="rgb(117,117,117)",
                 center=dict(lat=39.321, lon=-111.093),  # Center the map on Utah
                 projection_scale=4
             )

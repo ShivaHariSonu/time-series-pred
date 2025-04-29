@@ -13,7 +13,7 @@ const RsvOverviewChart = () => {
         RSV Admissions & Forecast
       </h2>
 
-      <div className="h-[800px] w-full">
+      <div className="h-[740px] w-full">
         <iframe
           src="http://localhost:8000/rsv-admissions/"
           style={{

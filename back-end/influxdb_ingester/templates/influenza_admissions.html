@@ -14,27 +14,17 @@
     
     <!-- Optionally add forms or links to filter by ORGANIZATION_NM and CHILDRENS_HOSPITAL -->
     <form method="get" class="bg-gray-800 p-6 rounded-xl shadow-lg max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <label for="organization" class="block mb-2 font-semibold">Organization:</label>
+        <label for="organization" class="block mb-2 font-semibold">Hospital:</label>
         <select id="organization" name="organization" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
-            <option value="">-- Select an Organization --</option>
             {% for org in organisations %}
-                <option value="{{ org }}">{{ org }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="hospital" class="block mb-2 font-semibold">Children's Hospital:</label>
-        <select id="hospital" name="hospital" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
-            <option value="">-- Select Hospital type --</option>
-            {% for option in hospital_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
+                <option value="{{ org }}" {% if org == organization %}selected{% endif %}>{{ org }}</option>
             {% endfor %}
         </select>
 
         <label for="timefreq" class="block mb-2 font-semibold">Time Frequency:</label>
         <select id="timefreq" name="timefreq" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
-            <option value="">-- Select Frequency Type --</option>
             {% for option in time_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
+                <option value="{{ option.value }}" {% if option.value == timefreq %}selected{% endif %}>{{ option.label }}</option>
             {% endfor %}
         </select>
         <div class="flex items-end">

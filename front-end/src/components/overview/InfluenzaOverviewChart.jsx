@@ -13,7 +13,7 @@ const InfluenzaOverviewChart = () => {
         Influenza Admissions & Forecast
       </h2>
 
-      <div className="h-[800px] w-full">
+      <div className="h-[740px] w-full">
         <iframe
           src="http://localhost:8000/influenza-admissions/"
           style={{

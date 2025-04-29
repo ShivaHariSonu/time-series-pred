@@ -45,10 +45,10 @@ def create_influenza_layout():
         html.H1("Influenza Time Series Prediction", style={'textAlign': 'center'}),
         
         html.Label("Select Organization:"),
-        dcc.Dropdown(id='influenza_org_filter', options=org_options, value='All', clearable=False),
+        dcc.Dropdown(id='influenza_org_filter', options=org_options, value='Primary Childrens Hospital', clearable=False),
 
         html.Label("Children's Hospital Filter:"),
-        dcc.Dropdown(id='influenza_hospital_filter', options=hospital_options, value='All', clearable=False),
+        dcc.Dropdown(id='influenza_hospital_filter', options=hospital_options, value=1, clearable=False),
 
         html.Label("Timeframe Filter:"),
         dcc.Dropdown(id='influenza_time_filter', options=time_options, value='ME', clearable=False),
