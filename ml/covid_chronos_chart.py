@@ -1,0 +1,135 @@
+import pandas as pd
+import plotly.express as px
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
+from chronos import ChronosPipeline
+import numpy as np
+import torch
+
+file_path = "datasets/germ_watch_data/germwatch_covid_hospitalizations_20241029_140153.csv"
+covid_df = pd.read_csv(file_path)
+
+
+covid_df_filtered = covid_df[["EMPI","COLLECTED_DTS","ORGANIZATION_NM", "CHILDRENS_HOSPITAL"]]
+covid_df_filtered.rename(columns={"COLLECTED_DTS": "DATE"}, inplace=True)
+covid_df_filtered['DATE'] = pd.to_datetime(covid_df_filtered['DATE'])
+covid_df_filtered["ADMISSIONS"] = covid_df_filtered.groupby(["DATE", "ORGANIZATION_NM", "CHILDRENS_HOSPITAL"])["EMPI"].transform('count')
+
+org_options = [{'label': org, 'value': org} for org in covid_df_filtered['ORGANIZATION_NM'].unique()]
+org_options.insert(0, {'label': 'All', 'value': 'All'})
+
+hospital_options = [{'label': str(hosp), 'value': hosp} for hosp in covid_df_filtered['CHILDRENS_HOSPITAL'].unique()]
+hospital_options.insert(0, {'label': 'All', 'value': 'All'})
+
+time_options = [{'label':time_format,'value':time_format[0]} for time_format in ['Week','Yearly','Daily']]
+time_options.insert(0, {'label': 'Month', 'value': 'M'})
+
+time_multiplier = {'M':12,'W':52,'Y':1,'D':365}
+
+min_data = {'M':12,'W':102,'Y':6,'D':24}
+
+pipeline = ChronosPipeline.from_pretrained("amazon/chronos-t5-tiny")
+
+app = dash.Dash(__name__)
+
+app.layout = html.Div([
+    html.H1("Monthly Admissions Dashboard", style={'textAlign': 'center'}),
+
+    # Dropdown for Organization Name
+    html.Label("Select Organization:"),
+    dcc.Dropdown(id='org_filter', options=org_options, value='All', clearable=False),
+
+    # Dropdown for Children's Hospital
+    html.Label("Children's Hospital Filter:"),
+    dcc.Dropdown(id='hospital_filter', options=hospital_options, value='All', clearable=False),
+    
+    # Dropdown for granularity
+    html.Label("Timeframe Filter:"),
+    dcc.Dropdown(id='time_filter', options=time_options, value='M', clearable=False),
+
+    # Graph
+    dcc.Graph(id='admissions_graph')
+])
+
+
+@app.callback(
+    Output('admissions_graph', 'figure'),
+    [Input('time_filter','value'),
+        Input('org_filter', 'value'),
+     Input('hospital_filter', 'value')]
+)
+def update_graph(selected_time, selected_org, selected_hospital):
+    filtered_df = covid_df_filtered.copy()
+    # Apply filters
+    if selected_org != 'All':
+        filtered_df = filtered_df[filtered_df['ORGANIZATION_NM'] == selected_org]
+    if selected_hospital != 'All':
+        filtered_df = filtered_df[filtered_df['CHILDRENS_HOSPITAL'] == selected_hospital]
+
+    forecast_dfs = []
+    for hospital in filtered_df['ORGANIZATION_NM'].unique():
+        df_hosp = filtered_df[filtered_df['ORGANIZATION_NM'] == hospital]
+        df_hosp = df_hosp.groupby([pd.Grouper(key='DATE',freq=selected_time), 'ORGANIZATION_NM', 'CHILDRENS_HOSPITAL']).agg({'ADMISSIONS': 'sum'}).reset_index()
+        if len(df_hosp) <= min_data[selected_time]:  # Skip hospitals with insufficient data
+            df_hosp['Type'] = 'Actual'
+            forecast_dfs.append(df_hosp)
+            continue
+        start_date = df_hosp['DATE'].min()
+        end_date = df_hosp['DATE'].max()
+        full_dates = pd.date_range(start=start_date, end=end_date, freq=selected_time)
+        full_df = pd.DataFrame({'DATE': full_dates})
+        df_hosp = full_df.merge(df_hosp, on='DATE', how='left')
+        df_hosp['ADMISSIONS'] = df_hosp['ADMISSIONS'].fillna(method='ffill')
+        df_hosp['ORGANIZATION_NM'] = hospital
+        df_hosp['CHILDRENS_HOSPITAL'] = df_hosp['CHILDRENS_HOSPITAL'].ffill().bfill()
+        
+        last_date = df_hosp['DATE'].max()
+        target_date = pd.Timestamp(2028, 12, 31)
+        future_dates = pd.date_range(
+            start=last_date + pd.tseries.frequencies.to_offset(selected_time),
+            end=target_date,
+            freq=selected_time
+        )
+        forecast_horizon = len(future_dates)
+        
+        context = torch.tensor(
+            df_hosp['ADMISSIONS'].values.astype(np.float32),  # Ensure float32
+            dtype=torch.float32).unsqueeze(0)
+        print(f"Context tensor shape: {context.shape}, dtype: {context.dtype}")
+        
+        quantiles, mean = pipeline.predict_quantiles(context=context,
+            prediction_length=forecast_horizon, quantile_levels=[0.1, 0.5, 0.9])
+        
+        mean_reshaped = mean.squeeze()
+        
+        forecast_df = pd.DataFrame({
+            'DATE': future_dates,
+            'ADMISSIONS': mean_reshaped.numpy(),
+            'ORGANIZATION_NM': hospital,
+            'CHILDRENS_HOSPITAL': df_hosp['CHILDRENS_HOSPITAL'].iloc[0],
+            'Type': 'Forecast'
+        })
+
+        # Combine actual and forecast data
+        df_hosp['Type'] = 'Actual'
+        forecast_dfs.append(df_hosp)
+        forecast_dfs.append(forecast_df)
+
+    final_df = pd.concat(forecast_dfs, ignore_index=True)
+    fig = px.line(
+        final_df,
+        x='DATE',
+        y='ADMISSIONS',
+        color='ORGANIZATION_NM',
+        line_dash='Type',  # Different line styles for actual vs. forecast
+        title="Monthly Admissions with Forecast up to 2028"
+    )
+    fig.update_traces(mode='lines+markers')
+    fig.update_xaxes(type='date')  
+    return fig
+
+
+# Run the app
+if __name__ == '__main__':
+    app.run_server(debug=True)
