@@ -106,11 +106,11 @@ def plot_covid_admissions_chart(covid_df,organization=None, child_hospital=None,
             continue
         series = TimeSeries.from_dataframe(df_hosp,time_col='timestamp',value_cols="ADMISSIONS",fill_missing_dates=True, freq=time_freq)
         df = series.pd_dataframe()
-        df_filled = df.fillna(method="ffill")
+        df_filled = df.ffill()
         series_filled = TimeSeries.from_dataframe(df_filled)
         model = ExponentialSmoothing(seasonal_periods=None)
         model.fit(series_filled)
-        forecast_horizon = (2028 - df_hosp['timestamp'].dt.year.max()) * time_multiplier[time_freq]
+        forecast_horizon = 4
         forecast = model.predict(forecast_horizon)
         forecast_df = forecast.pd_dataframe()
         forecast_df['timestamp'] = forecast_df.index
@@ -126,8 +126,7 @@ def plot_covid_admissions_chart(covid_df,organization=None, child_hospital=None,
             y='ADMISSIONS',
             color='ORGANIZATION_NM',
             line_dash='Type',
-            markers=True,
-            title="Admissions with Forecast up to 2028"
+            markers=True
         )
     fig.update_xaxes(type='date') 
     return fig.to_html(full_html=False)
@@ -135,7 +134,7 @@ def plot_covid_admissions_chart(covid_df,organization=None, child_hospital=None,
 def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, time_freq=None):
     if organization:
         covid_df = covid_df[covid_df['ORGANIZATION_NM'] == organization]
-    if hospital:
+    if hospital and hospital!='All':
         covid_df = covid_df[covid_df['CHILDRENS_HOSPITAL'] == hospital]
     forecast_dfs = []
     for hospital in covid_df['ORGANIZATION_NM'].unique():
@@ -154,7 +153,6 @@ def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, t
             "LATITUDE":[hospital_locations[hospital][0]],
             "LONGITUDE":[hospital_locations[hospital][1]],
             "SIZE": [df_hosp["ADMISSIONS"].iloc[-1]],
-            "PRED_LEVEL" : [0],
             "COLOR":[slope],
             "ORGANIZATION":[hospital]
             }
@@ -162,7 +160,7 @@ def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, t
             continue
         
         df_hosp_series = TimeSeries.from_dataframe(df_hosp,time_col='timestamp',value_cols="ADMISSIONS",fill_missing_dates=True, freq=time_freq).pd_dataframe()
-        series_filled = TimeSeries.from_dataframe(df_hosp_series.fillna(method="ffill"))
+        series_filled = TimeSeries.from_dataframe(df_hosp_series.ffill())
         model = ExponentialSmoothing(seasonal_periods=None)
         model.fit(series_filled)
         forecast = model.predict(4).pd_dataframe()
@@ -173,22 +171,18 @@ def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, t
         model = LinearRegression()
         model.fit(X,y)
         slope = model.coef_[0][0] if isinstance(model.coef_[0], np.ndarray) else model.coef_[0]
-        prev = circle
-        for i in range(5):
-            if circle==prev:
-                data = {
-                    "LATITUDE":[hospital_locations[hospital][0]],
-                    "LONGITUDE":[hospital_locations[hospital][1]],
-                    "SIZE":[circle],
-                    "PRED_LEVEL" : [i], 
-                    "COLOR":[slope],
-                    "ORGANIZATION":[hospital]
-                    }
-                forecast_dfs.append(pd.DataFrame(data))
-            if i>=4:
-                break
-            circle += max(0,forecast.iloc[i,0]-prev)
-            prev = forecast.iloc[i,0]
+        data = {
+                "LATITUDE":[hospital_locations[hospital][0]],
+                "LONGITUDE":[hospital_locations[hospital][1]],
+                "SIZE":[circle],
+                "COLOR":[slope],
+                "ORGANIZATION":[hospital],
+                "FIRST_PRED":int(size_points[0].item()),
+                "SECOND_PRED":int(size_points[1].item()),
+                "THIRD_PRED":int(size_points[2].item()),
+                "FOURTH_PRED":int(size_points[3].item())
+                }
+        forecast_dfs.append(pd.DataFrame(data))
     final_df = pd.concat(forecast_dfs, ignore_index=True)
     fig = go.Figure()
     fig.add_trace(go.Scattergeo(
@@ -200,12 +194,17 @@ def plot_covid_admissions_map_chart(covid_df,organization=None, hospital=None, t
         color=final_df["COLOR"],  # Use PRED_LEVEL for coloring
         colorscale="RdBu",  # Choose a colorscale for the PRED_LEVEL values
         colorbar=dict(title="COLOR"),  # Add a colorbar to indicate the scale
-        showscale=True,  # Show the color scale
+        showscale=True,
         reversescale = True,
-        cmin=final_df["COLOR"].quantile(0.05),  # Set the lower bound (5th percentile)
-        cmax=final_df["COLOR"].quantile(0.95),
+        cmin=-3,
+        cmax=3,
     ),
-    text=final_df["ORGANIZATION"] + "<br>" + "Admissions: " + final_df["SIZE"].astype(str)+ "<br>" + "Prediction "+time_freq+": "+final_df["PRED_LEVEL"].astype(str),
+    text=final_df["ORGANIZATION"] + 
+    "<br>" + "Admissions: " + final_df["SIZE"].astype(str) +
+    "<br>" + "First Prediction: " + final_df["FIRST_PRED"].astype(str) +
+    "<br>" + "Second Prediction: " + final_df["SECOND_PRED"].astype(str) +
+    "<br>" + "Third Prediction: " + final_df["THIRD_PRED"].astype(str) +
+    "<br>" + "Fourth Prediction: " + final_df["FOURTH_PRED"].astype(str),
     ))
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
@@ -228,7 +227,7 @@ def plot_influenza_admissions_chart(influenza_df,organization=None, time_freq=No
         influenza_df = influenza_df[influenza_df['ORGANIZATION_NM'] == organization]
         
     if len(influenza_df)==0:
-        fig = px.line(title="Influenza Time Series prediction")
+        fig = px.line()
         fig.update_xaxes(
         dtick="M1",  # Show each month
         tickformat="%b",  # Display month names (Jan, Feb, etc.)
@@ -249,11 +248,11 @@ def plot_influenza_admissions_chart(influenza_df,organization=None, time_freq=No
             continue
         series = TimeSeries.from_dataframe(df_hosp,time_col='timestamp',value_cols="ADMISSIONS",fill_missing_dates=True, freq=time_freq)
         df = series.pd_dataframe()
-        df_filled = df.fillna(method="ffill")
+        df_filled = df.ffill()
         series_filled = TimeSeries.from_dataframe(df_filled)
         model = ExponentialSmoothing(seasonal_periods=None)
         model.fit(series_filled)
-        forecast_horizon = (2028 - df_hosp['timestamp'].dt.year.max()) * time_multiplier[time_freq]
+        forecast_horizon = 4
         forecast = model.predict(forecast_horizon)
         forecast_df = forecast.pd_dataframe()
         forecast_df['timestamp'] = forecast_df.index
@@ -270,8 +269,7 @@ def plot_influenza_admissions_chart(influenza_df,organization=None, time_freq=No
             x='NORMALIZED_DATE',
             y='ADMISSIONS',
             color="YEAR",
-            line_dash='Type',  # Different line styles for actual vs. forecast
-            title="Influenza Time Series prediction",
+            line_dash='Type', 
             labels={"ADMISSIONS": "No. of Admissions", "NORMALIZED_DATE": "Month"},
             facet_row="ORGANIZATION_NM"
         )
@@ -289,7 +287,7 @@ def plot_rsv_admissions_chart(rsv_df,organization=None, time_freq=None):
         rsv_df = rsv_df[rsv_df['ORGANIZATION_NM'] == organization]
         
     if len(rsv_df)==0:
-        fig = px.line(title="RSV Time Series prediction")
+        fig = px.line()
         fig.update_xaxes(
         dtick="M1",  # Show each month
         tickformat="%b",  # Display month names (Jan, Feb, etc.)
@@ -309,11 +307,11 @@ def plot_rsv_admissions_chart(rsv_df,organization=None, time_freq=None):
             continue
         series = TimeSeries.from_dataframe(df_hosp,time_col='timestamp',value_cols="ADMISSIONS",fill_missing_dates=True, freq=time_freq)
         df = series.pd_dataframe()
-        df_filled = df.fillna(method="ffill")
+        df_filled = df.ffill()
         series_filled = TimeSeries.from_dataframe(df_filled)
         model = ExponentialSmoothing(seasonal_periods=None)
         model.fit(series_filled)
-        forecast_horizon = (2028 - df_hosp['timestamp'].dt.year.max()) * time_multiplier[time_freq]
+        forecast_horizon = 4
         forecast = model.predict(forecast_horizon)
         forecast_df = forecast.pd_dataframe()
         forecast_df['timestamp'] = forecast_df.index
@@ -330,8 +328,7 @@ def plot_rsv_admissions_chart(rsv_df,organization=None, time_freq=None):
             x='NORMALIZED_DATE',
             y='ADMISSIONS',
             color="YEAR",
-            line_dash='Type',  # Different line styles for actual vs. forecast
-            title="RSV Time Series prediction",
+            line_dash='Type',
             labels={"ADMISSIONS": "No. of Admissions", "NORMALIZED_DATE": "Month"},
             facet_row="ORGANIZATION_NM"
         )
@@ -361,6 +358,7 @@ def covid_admissions_view(request):
                                                      'hospital_options':hospital_options,
                                                      'time_options':time_options,
                                                      'hospital': hospital,
+                                                     'organization': organization,
                                                      'timefreq': timefreq})
 
 def covid_map_view(request):
@@ -375,7 +373,10 @@ def covid_map_view(request):
     return render(request, 'covid_map_admissions.html', {'chart_html_covid_map': chart_html_covid_map,
                                                          'organisations': hospital_locations.keys(), 
                                                      'hospital_options':hospital_options,
-                                                     'time_options':time_options})
+                                                     'time_options':time_options,
+                                                     'hospital': hospital,
+                                                     'organization': organization,
+                                                     'timefreq': timefreq})
     
     
 def influenza_admissions_view(request):

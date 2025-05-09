@@ -25,7 +25,7 @@
         <select id="organization" name="organization" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
             <option value="">-- Select an Hospital --</option>
             {% for org in organisations %}
-                <option value="{{ org }}">{{ org }}</option>
+                <option value="{{ org }}" {% if org == organization %}selected{% endif %}>{{ org }}</option>
             {% endfor %}
         </select>
 
