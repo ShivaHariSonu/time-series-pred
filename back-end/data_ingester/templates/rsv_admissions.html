@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RSV Admissions Chart</title>
+    <!-- Plotly JS (if not already included elsewhere) -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+    <div class="max-w-7xl mx-auto mb-8">
+        {{ chart_html_rsv|safe }}
+    </div>
+    
+    <!-- Optionally add forms or links to filter by ORGANIZATION_NM and CHILDRENS_HOSPITAL -->
+    <form method="get" class="bg-gray-800 p-6 rounded-xl shadow-lg max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <label for="organization" class="block mb-2 font-semibold">Hospital:</label>
+        <select id="organization" name="organization" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+            {% for org in organisations %}
+                <option value="{{ org }}" {% if org == organization %}selected{% endif %}>{{ org }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="timefreq" class="block mb-2 font-semibold">Time Frequency:</label>
+        <select id="timefreq" name="timefreq" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+            {% for option in time_options %}
+                <option value="{{ option.value }}" {% if option.value == timefreq %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+        <div class="flex items-end">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg w-full">
+                Filter
+            </button>
+        </div>
+    </form>
+</body>
+</html>

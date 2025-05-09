@@ -77,8 +77,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'timeseriesprediction',
+        'USER': 'postgres',
+        'PASSWORD':'Monysonu321',
+        'HOST':'localhost',
+        'PORT':'5432'
+        
     }
 }
 
@@ -125,15 +130,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-INSTALLED_APPS += ['influxdb_ingester','rest_framework', 'corsheaders']
+INSTALLED_APPS += ['data_ingester','rest_framework', 'corsheaders']
 
-# InfluxDB Configuration
-INFLUXDB_SETTINGS = {
-    'token': os.getenv('INFLUXDB_TOKEN'),
-    'org': os.getenv('INFLUXDB_ORG'),
-    'url': os.getenv('INFLUXDB_URL'),
-    'bucket': os.getenv('INFLUXDB_BUCKET')
-}
 
 X_FRAME_OPTIONS = "ALLOWALL"
 CORS_ALLOW_ALL_ORIGINS = True

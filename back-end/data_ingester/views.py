@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 from sklearn.linear_model import LinearRegression
 # Create your views here.
 
-from influxdb_ingester.utils.influx import (
+from data_ingester.utils.influx import (
     create_influx_client,
     query_data
 )
