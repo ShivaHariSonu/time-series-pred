@@ -3,3 +3,5 @@ datasets
 ml/__pycache__
 ml/final/__pycache__
 back-end/influxdb_ingester/__pycache__
+*.pyc
+__pycache__/

@@ -1,13 +1,13 @@
-import CovidMapChart from '../components/overview/CovidMapChart';
+import RsvOverviewChart from '../components/overview/RsvOverviewChart';
 
-const MapPage = () => {
+const RsvPage = () => {
   return (
     <main className='max-w-10xl mx-auto py-6 px-4 lg:px-8 xl:px-20 bg-white'>
       <div className='w-full'>
-        <CovidMapChart />
+        <RsvOverviewChart />
       </div>
     </main>
   );
 };
 
-export default MapPage;
+export default RsvPage;

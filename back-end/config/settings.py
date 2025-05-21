@@ -78,15 +78,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'timeseriesprediction',
-        'USER': 'postgres',
-        'PASSWORD':'Monysonu321',
-        'HOST':'localhost',
-        'PORT':'5432'
+        'NAME': os.environ.get("POSTGRES_DATABASE_NAME"),
+        'USER': os.environ.get("POSTGRES_USERNAME"),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
+        'HOST':os.environ.get("POSTGRES_HOST"),
+        'PORT':os.environ.get("POSTGRES_PORT")
         
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -116,7 +115,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

@@ -1,21 +1,12 @@
-import { motion } from "framer-motion";
-import React from 'react';
-
 const CovidOverviewChart = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const iframeUrl = `${baseUrl}/covid-admissions/`;
   return (
-    <motion.div 
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-      initial={{opacity:0,y:20}}
-      animate={{opacity:1,y:0}}
-      transition={{delay:0.2}}>
-      
-      <h2 className="text-lg font-medium mb-4 text-gray-100">
-        COVID Admissions & Forecast
-      </h2>
+    <main className='max-w-10xl py-6 px-4 lg:px-8 xl:px-20 bg-white'>
 
       <div className="h-[800px] w-full">
         <iframe
-          src="http://localhost:8000/covid-admissions/"
+          src={iframeUrl}
           style={{
             width: '100%',
             height: '100%',
@@ -25,8 +16,8 @@ const CovidOverviewChart = () => {
           title="COVID Admissions Dashboard"
         />
       </div>
-    </motion.div>
-  )
-}
+    </main>
+  );
+};
 
 export default CovidOverviewChart;

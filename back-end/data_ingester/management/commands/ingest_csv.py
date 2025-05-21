@@ -1,9 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from data_ingester.utils.influx import (
-    create_influx_client,
-    create_bucket_if_not_exists,
+from data_ingester.utils.postgres import (
     read_csv_data,
     ingest_data
 )
@@ -19,33 +17,20 @@ class Command(BaseCommand):
             required=True
         )
         parser.add_argument(
-            '--measurement',
+            '--disease',
             type=str,
-            help='Type of the file',
+            help='Type of the disease',
             required=True
         )
         
         
 
     def handle(self, *args, **options):
-        conf = settings.INFLUXDB_SETTINGS
-        influx_token = conf['token']
-        influx_url = conf['url']
-        influx_org = conf['org']
-        bucket_name = conf['bucket']
-        file_path = options['file_path']
-        measurement = options['measurement']
 
         self.stdout.write("Starting ingestion process...")
+        file_path = options['file_path']
+        disease = options['disease']
 
-        # Create InfluxDB client and ensure the bucket exists
-        client = create_influx_client(influx_url, influx_token, influx_org)
-        create_bucket_if_not_exists(client, bucket_name, influx_org)
-
-        # Read CSV data and ingest into InfluxDB
         df = read_csv_data(file_path)
-        ingest_data(client, bucket_name, influx_org, df, measurement)
-
-        # Close the InfluxDB client
-        client.close()
+        ingest_data(df,disease)
         self.stdout.write(self.style.SUCCESS("Data ingestion completed."))

@@ -37,7 +37,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This project focuses on real time analytics of the Disease progression. It shows the analytics for mainly 3 diseases:- Covid, RSV and Influenza over the years. The data ingested through the Apache Kafka pipeline onto the Timeseries database InfluxDB. I am using Python Darts library for the time series prediction. I am using React in the front End and Django in the backend
+This project focuses on real time analytics of the Disease progression. It shows the analytics for mainly 3 diseases:- Covid, RSV and Influenza over the years. The data ingested to the PostgreSQL. I am using Python Darts library for the time series prediction. I am using React in the front End and Django in the backend
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -45,11 +45,10 @@ This project focuses on real time analytics of the Disease progression. It shows
 
 ### Built With
 
-* <a href="https://spark.apache.org/">Apache Kafka </a>
-* <a href="https://solr.apache.org/"> InfluxDB</a>
-* <a href="https://solr.apache.org/"> Darts</a>
-* <a href="https://solr.apache.org/"> React</a>
-* <a href="https://solr.apache.org/"> Django</a>
+* <a href="https://www.postgresql.org/"> PostgreSQL</a>
+* <a href="https://unit8co.github.io/darts/"> Darts</a>
+* <a href="https://react.dev/"> React</a>
+* <a href="https://www.djangoproject.com/"> Django</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -72,17 +71,7 @@ Follow these steps to get your development environment set up:
    npm build
    npm run dev
    ```
-3. Start the Apache Kafka and create a topic called timeseries-pred
-   ```sh
-    bin/zookeeper-server-start.sh config/zookeeper.properties
-    bin/kafka-server-start.sh config/server.properties
-    bin/kafka-topics.sh --create --topic covid-data --bootstrap-server localhost:9092
-   ```
-4. Start the InfluxDB database:
-4. Start the backend application 
-   ```sh
-   python manage.py runserver
-   ``` 
+
 
 ## Contact
 
