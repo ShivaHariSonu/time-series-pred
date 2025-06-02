@@ -64,7 +64,7 @@ def get_admissions_since(table_name,start_timestamp: Optional[Union[str, datetim
     with engine.connect() as connection:
         return pd.read_sql(sql,connection)
 
-def get_admissions_with_filters(disease,time_freq,organization,childrens_hospital):
+def get_admissions_with_filters(disease,time_freq,organization,childrens_hospital, map=False):
     table_name = f"public.data_ingester_{disease}record"
     query = f"""
         SELECT
@@ -90,7 +90,19 @@ def get_admissions_with_filters(disease,time_freq,organization,childrens_hospita
         organization = None
     params = (time_freq,organization, organization, childrens_hospital, childrens_hospital)
     with engine.connect() as connection:
-        return pd.read_sql_query(query, connection, params=params)
+        df = pd.read_sql_query(query, connection, params=params)
+        if map:
+            return df
+        df_sorted = df.sort_values(by='forecast')
+        df_deduped = df_sorted.drop_duplicates(subset=['period', 'organization'], keep='first')
+        df_deduped_sorted = df_deduped.sort_values(by=['organization','period'],ascending=[True,True])
+        
+        forecast_false_df = df_deduped_sorted[df_deduped_sorted['forecast'] == False]
+        forecast_true_df = df_deduped_sorted[df_deduped_sorted['forecast'] == True]
+        forecast_true_top4 = forecast_true_df.groupby('organization').head(4)
+        final_df = pd.concat([forecast_false_df, forecast_true_top4]).sort_values(by=['organization', 'period']).reset_index(drop=True)
+        return final_df
+
     
 def convert_to_darts_series(df_hosp):
     ts = TimeSeries.from_dataframe(df_hosp, time_col="timestamp", value_cols="admissions", fill_missing_dates=True, freq='D').astype(np.float32)

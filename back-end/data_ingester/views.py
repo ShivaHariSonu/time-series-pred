@@ -81,7 +81,8 @@ def get_hospitals_ajax(request):
 
 def prepare_plot_data(df):
     # Separate actual and forecast
-    df.rename(columns={'period': 'timestamp'}, inplace=True)
+    df = df.copy()
+    df.rename(columns={'period': 'timestamp'},inplace=True)
     actual_df = df[df['forecast'] == False][['timestamp', 'organization', 'admissions']].copy()
     actual_df['Type'] = 'Actual'
     actual_df.rename(columns={'admissions': 'value'}, inplace=True)
@@ -138,7 +139,8 @@ def plot_covid_admissions_chart(organization=None, child_hospital=None, time_fre
     line_dash='Type',
     line_dash_map=line_styles,
     color_discrete_map=color_map,
-    markers=True
+    markers=True,
+    hover_data=['organization', 'value','timestamp']
     )
 
     fig.update_layout(
@@ -167,7 +169,7 @@ def plot_covid_admissions_chart(organization=None, child_hospital=None, time_fre
 
 def plot_covid_admissions_map_chart(organization=None, child_hospital=None, time_freq=None):
 
-    covid_df = get_admissions_with_filters(disease="covid",time_freq=time_freq,organization=organization,childrens_hospital=child_hospital)
+    covid_df = get_admissions_with_filters(disease="covid",time_freq=time_freq,organization=organization,childrens_hospital=child_hospital,map=True)
     covid_df_plot = prepare_plot_data(covid_df)
     forecast_dfs = []
     for hospital in covid_df_plot['organization'].unique():
