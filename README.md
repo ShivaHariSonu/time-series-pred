@@ -1,7 +1,7 @@
 
 <div align="center">
 
-<h2 align="center">Real Time Analytics of Disease Progression</h2>
+<h2 align="center">U Health Forecast Hub</h2>
 
   <p align="center">
     <a href="https://github.com/ShivaHariSonu/time-series-pred"><strong>Explore the docs »</strong></a>
@@ -66,12 +66,27 @@ Follow these steps to get your development environment set up:
 1. Change to the project directory as shown below:
    ```sh
    cd time-series-pred/front-end/
-2. Start the front end using:
+2. Make sure you install all the necessary dependencies needed for the project
+3. Start the front end using:
    ```sh
    npm build
    npm run dev
    ```
+4. Make sure you start postgres database in your local system.
 
+5. In another tab, open the backend directory as shown below
+   ```sh
+   cd time-series-pred/back-end/
+   ```
+6. After installing all the necessary dependencies (I have added requirements.txt file. You can install the dependencies from there in your virtual environment), run the initial migrations
+   ```sh
+   python manage.py migrate
+   ```
+7. Run the development Server
+   ```sh
+   python manage.py runserver
+   ```
+8. Open the browser at localhost:5173
 
 ## Contact
 
